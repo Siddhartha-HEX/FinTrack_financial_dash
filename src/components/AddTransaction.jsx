@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../firebase/firebase";
 import { Plus, Pencil, X, Tag } from "lucide-react";
 
-// Transaction type tabs
 const TX_TYPES = [
-  { id: "credit", label: "Credit",  hint: "Money received / income",  color: "var(--income)",  sign: +1 },
-  { id: "debit",  label: "Debit",   hint: "Money spent / expense",    color: "var(--expense)", sign: -1 },
+  { id: "credit", label: "Credit", hint: "Money received / income", color: "var(--income)",  sign: +1 },
+  { id: "debit",  label: "Debit",  hint: "Money spent / expense",   color: "var(--expense)", sign: -1 },
 ];
 
-// Categories per type
 const CREDIT_CATS = ["Salary", "Freelance", "Investment", "Gift", "Refund"];
 const DEBIT_CATS  = ["Food", "Shopping", "Bills", "Transport", "Healthcare", "Entertainment", "Others"];
 
@@ -21,16 +20,24 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
   const [category, setCategory]     = useState("");
   const [customCat, setCustomCat]   = useState("");
   const [showCustom, setShowCustom] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const customRef = useRef(null);
 
   const categories = txType === "credit" ? CREDIT_CATS : DEBIT_CATS;
+
+  // Track auth state so we always have the current user
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsub();
+  }, []);
 
   // Populate form when editing
   useEffect(() => {
     if (editData) {
       setTitle(editData.title);
       setAmount(Math.abs(editData.amount));
-      // Detect type from stored amount sign
       const type = editData.amount >= 0 ? "credit" : "debit";
       setTxType(type);
       const cats = type === "credit" ? CREDIT_CATS : DEBIT_CATS;
@@ -48,12 +55,10 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
     }
   }, [editData]);
 
-  // Auto-focus custom input when shown
   useEffect(() => {
     if (showCustom && customRef.current) customRef.current.focus();
   }, [showCustom]);
 
-  // Reset category when type changes
   useEffect(() => {
     if (!editData) {
       setCategory("");
@@ -85,6 +90,12 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!currentUser) {
+      toast.error("You must be logged in to add transactions.");
+      return;
+    }
+
     const cat = finalCategory();
     if (!title || !amount || !cat) {
       toast.error("Please fill in all fields.");
@@ -98,35 +109,43 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
     const sign = TX_TYPES.find((t) => t.id === txType).sign;
     const signedAmount = sign * Math.abs(Number(amount));
 
-    if (editData) {
-      const updated = { ...editData, title, amount: signedAmount, category: cat };
-      await updateDoc(doc(db, "transactions", editData.firestoreId), {
-        title, amount: signedAmount, category: cat,
-      });
-      setTransactions(transactions.map((t) =>
-        t.firestoreId === editData.firestoreId ? updated : t
-      ));
-      toast.success("Transaction updated.");
-      setEditData(null);
-    } else {
-      const newTx = {
-        id: Date.now(),
-        title,
-        amount: signedAmount,
-        category: cat,
-        type: txType,
-        userId: auth.currentUser.uid,
-        date: new Date().toLocaleDateString("en-IN"),
-      };
-      const ref = await addDoc(collection(db, "transactions"), newTx);
-      setTransactions([{ firestoreId: ref.id, ...newTx }, ...transactions]);
-      toast.success("Transaction added.");
+    try {
+      if (editData) {
+        await updateDoc(doc(db, "transactions", editData.firestoreId), {
+          title,
+          amount: signedAmount,
+          category: cat,
+        });
+        setTransactions(transactions.map((t) =>
+          t.firestoreId === editData.firestoreId
+            ? { ...editData, title, amount: signedAmount, category: cat }
+            : t
+        ));
+        toast.success("Transaction updated.");
+        setEditData(null);
+      } else {
+        const newTx = {
+          id: Date.now(),
+          title,
+          amount: signedAmount,
+          category: cat,
+          type: txType,
+          userId: currentUser.uid,   // ← use currentUser, not auth.currentUser
+          date: new Date().toLocaleDateString("en-IN"),
+        };
+        const ref = await addDoc(collection(db, "transactions"), newTx);
+        setTransactions([{ firestoreId: ref.id, ...newTx }, ...transactions]);
+        toast.success("Transaction added.");
+      }
+      resetForm();
+    } catch (err) {
+      console.error("Firestore write error:", err);
+      toast.error("Failed to save transaction: " + err.message);
     }
-    resetForm();
   };
 
-  const isEditing = Boolean(editData);
-  const activeType = TX_TYPES.find((t) => t.id === txType);
+  const isEditing   = Boolean(editData);
+  const activeType  = TX_TYPES.find((t) => t.id === txType);
 
   return (
     <div className="panel atx-panel">
@@ -137,11 +156,17 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
             {isEditing ? "Edit Transaction" : "New Transaction"}
           </div>
           <div className="panel-subtitle">
-            {isEditing ? "Update the details below, then save." : "Record a credit or debit to your account."}
+            {isEditing
+              ? "Update the details below, then save."
+              : "Record a credit or debit to your account."}
           </div>
         </div>
         {isEditing && (
-          <button className="pill-btn" onClick={() => { setEditData(null); resetForm(); }} style={{ fontSize: 12 }}>
+          <button
+            className="pill-btn"
+            onClick={() => { setEditData(null); resetForm(); }}
+            style={{ fontSize: 12 }}
+          >
             <X size={12} style={{ marginRight: 4, verticalAlign: "middle" }} />Cancel
           </button>
         )}
@@ -157,7 +182,10 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
             style={txType === id ? { borderColor: color, color } : {}}
             onClick={() => setTxType(id)}
           >
-            <span className="tx-type-dot" style={{ background: txType === id ? color : "var(--text-muted)" }} />
+            <span
+              className="tx-type-dot"
+              style={{ background: txType === id ? color : "var(--text-muted)" }}
+            />
             {label}
           </button>
         ))}
@@ -208,7 +236,6 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
 
-            {/* Custom category input — slides in when "Others" selected */}
             {showCustom && (
               <div className="custom-cat-wrap">
                 <Tag size={14} className="custom-cat-icon" />
@@ -216,7 +243,7 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
                   ref={customRef}
                   type="text"
                   className="form-input custom-cat-input"
-                  placeholder='Type category name…'
+                  placeholder="Type category name…"
                   value={customCat}
                   onChange={(e) => setCustomCat(e.target.value)}
                   maxLength={32}
@@ -232,7 +259,9 @@ function AddTransaction({ transactions, setTransactions, editData, setEditData }
             type="submit"
             className={`submit-btn ${isEditing ? "editing" : ""} ${txType === "credit" ? "credit" : "debit"}`}
           >
-            {isEditing ? "Save changes" : txType === "credit" ? "Add credit →" : "Add debit →"}
+            {isEditing
+              ? "Save changes"
+              : txType === "credit" ? "Add credit →" : "Add debit →"}
           </button>
         </div>
       </form>
