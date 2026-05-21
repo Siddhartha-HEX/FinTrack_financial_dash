@@ -1,48 +1,70 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { Wallet, TrendingUp, TrendingDown, Receipt, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import {
+  Wallet, TrendingUp, TrendingDown, Receipt,
+  ArrowUpCircle, ArrowDownCircle,
+} from "lucide-react";
 
 import { db, auth } from "../firebase/firebase";
-import Sidebar        from "../components/Sidebar";
-import Navbar         from "../components/Navbar";
-import AddTransaction from "../components/AddTransaction";
-import Transactions   from "../components/Transactions";
-import ExpenseChart   from "../components/ExpenseChart";
+import Sidebar         from "../components/Sidebar";
+import Navbar          from "../components/Navbar";
+import AddTransaction  from "../components/AddTransaction";
+import Transactions    from "../components/Transactions";
+import ExpenseChart    from "../components/ExpenseChart";
 import FinanceProgress from "../components/FinanceProgress";
 
 const card = (i) => ({
   hidden: { opacity: 0, y: 20 },
-  show:   { opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] } },
+  show: {
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+  },
 });
 
 function MainContent() {
-  const [transactions, setTransactions] = useState([]);
-  const [editData, setEditData]         = useState(null);
-  const [searchTerm, setSearchTerm]     = useState("");
+  const [transactions, setTransactions]     = useState([]);
+  const [editData, setEditData]             = useState(null);
+  const [searchTerm, setSearchTerm]         = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
-  const [darkMode, setDarkMode]         = useState(true);
-  const [loading, setLoading]           = useState(true);
+  const [darkMode, setDarkMode]             = useState(true);
+  const [loading, setLoading]               = useState(true);
 
   // Apply light/dark to body
   useEffect(() => {
     document.body.classList.toggle("light", !darkMode);
   }, [darkMode]);
 
+  // ── Real-time Firestore listener ──────────────────────────────────────────
   useEffect(() => {
-    const fetchData = async () => {
+    // Wait until auth is ready
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) return;
+
       const q = query(
         collection(db, "transactions"),
-        where("userId", "==", auth.currentUser.uid)
+        where("userId", "==", user.uid)
       );
-      const snap = await getDocs(q);
-      const data = snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() }));
-      // Sort by id desc (most recent first)
-      data.sort((a, b) => b.id - a.id);
-      setTransactions(data);
-      setLoading(false);
-    };
-    fetchData();
+
+      const unsubSnap = onSnapshot(
+        q,
+        (snap) => {
+          const data = snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() }));
+          data.sort((a, b) => b.id - a.id);
+          setTransactions(data);
+          setLoading(false);
+        },
+        (err) => {
+          console.error("Firestore listener error:", err);
+          setLoading(false);
+        }
+      );
+
+      // Cleanup snapshot listener when auth changes
+      return unsubSnap;
+    });
+
+    return () => unsubAuth();
   }, []);
 
   const income   = transactions.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
@@ -153,7 +175,7 @@ function MainContent() {
             <FinanceProgress income={income} expense={expense} />
           </div>
 
-          {/* Add/Edit form */}
+          {/* Add / Edit form */}
           <AddTransaction
             transactions={transactions}
             setTransactions={setTransactions}
