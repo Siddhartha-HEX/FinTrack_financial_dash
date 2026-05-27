@@ -1465,3 +1465,274 @@ html, body {
 .cat-investment    { background: rgba(124,156,255,0.12); color: #7c9cff; }
 .cat-gift          { background: rgba(245,166,35,0.12);  color: #f5a623; }
 .cat-refund        { background: rgba(0,229,195,0.1);    color: #00e5c3; }
+/* ===========================
+   TRANSACTIONS PAGE
+   =========================== */
+
+.tx-summary-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.tx-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  flex: 1;
+}
+
+.tx-summary-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  flex: 1;
+}
+
+.tx-summary-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.tx-summary-val.positive { color: var(--income); }
+.tx-summary-val.negative { color: var(--expense); }
+
+.tx-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.type-filter-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.type-pill {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.type-pill:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.type-pill.active          { border-color: var(--border-strong); color: var(--text-primary); background: var(--bg-hover); }
+.type-pill.active.credit   { border-color: var(--income);  color: var(--income);  background: var(--income-dim); }
+.type-pill.active.debit    { border-color: var(--expense); color: var(--expense); background: var(--expense-dim); }
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 40px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.type-credit { background: var(--income-dim);  color: var(--income); }
+.type-debit  { background: var(--expense-dim); color: var(--expense); }
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable-th span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sortable-th:hover { color: var(--text-primary); }
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pagination-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pg-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pg-btn:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.pg-btn.active {
+  background: var(--accent-dim);
+  border-color: rgba(0, 229, 195, 0.3);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pg-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pg-ellipsis {
+  padding: 0 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* ===========================
+   CONFIRM DELETE MODAL
+   =========================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px 28px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  animation: modal-pop 0.2s var(--ease);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes modal-pop {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--expense-dim);
+  border: 1px solid rgba(255, 77, 109, 0.2);
+  color: var(--expense);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.modal-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.modal-btn.cancel {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.modal-btn.cancel:hover { color: var(--text-primary); border-color: var(--border-strong); }
+
+.modal-btn.confirm { background: var(--expense); color: #fff; }
+.modal-btn.confirm:hover { opacity: 0.85; }
+
+/* Sidebar active indicator */
+.sidebar-nav li { position: relative; }
+
+.sidebar-nav li.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+@media (max-width: 600px) {
+  .tx-summary-row { flex-direction: column; }
+  .tx-filter-bar  { flex-direction: column; align-items: stretch; }
+  .type-filter-pills { justify-content: flex-start; }
+  .pagination-bar { flex-direction: column; align-items: flex-start; }
+}
