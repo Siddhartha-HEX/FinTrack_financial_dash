@@ -1910,3 +1910,62 @@ html, body {
   background: #f1f5f9 !important;
   color: #64748b !important;
 }
+/* Fix Edit/Delete button styles */
+.transactions td button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #7c3aed;
+  color: white;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+
+.transactions td button:hover {
+  transform: translateY(-2px);
+  background: #8b5cf6;
+}
+
+.transactions td .edit-btn {
+  margin-right: 8px;
+  background: #06b6d4;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+}
+
+.transactions td .edit-btn:hover {
+  background: #0891b2;
+}
+
+.transactions td .delete-btn {
+  background: #ef4444;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+.transactions td .delete-btn:hover {
+  background: #dc2626;
+}
+
+.transactions td .save-btn {
+  margin-right: 8px;
+  background: #22c55e !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3) !important;
+}
+
+.transactions td .save-btn:hover {
+  background: #16a34a !important;
+}
+
+.transactions td .cancel-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
+}
+
+.transactions td .cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  transform: none !important;
+}
