@@ -11,6 +11,8 @@ import Transactions     from "../components/Transactions";
 import ExpenseChart     from "../components/ExpenseChart";
 import FinanceProgress  from "../components/FinanceProgress";
 import TransactionsPage from "./TransactionsPage";
+import Analytics from "./Analytics";
+import BudgetPage from "./BudgetPage";
 
 const pageVariants = {
   hidden: { opacity: 0, y: 14 },
@@ -90,6 +92,18 @@ function MainContent() {
 
         <div className="page-content">
           <AnimatePresence mode="wait">
+            {/* ── BUDGET PAGE ── */}
+            {activePage === "Budget" && (
+              <motion.div
+                key="budget"
+                variants={pageVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+              >
+                <BudgetPage transactions={transactions} />
+              </motion.div>
+            )}
 
             {/* ── DASHBOARD ── */}
             {activePage === "Dashboard" && (
@@ -153,6 +167,18 @@ function MainContent() {
                   transactions={transactions}
                   setTransactions={setTransactions}
                 />
+              </motion.div>
+            )}
+            {/* ── ANALYTICS PAGE ── */}
+            {activePage === "Analytics" && (
+              <motion.div
+                key="analytics"
+                variants={pageVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+              >
+                <Analytics transactions={transactions} />
               </motion.div>
             )}
 
