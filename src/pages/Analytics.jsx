@@ -82,7 +82,10 @@ function Analytics({ transactions }) {
     // Monthly trend
     const monthMap = {};
     transactions.forEach(t => {
-      const d = new Date(t.date);
+      const parts = t.date?.split("/");                              
+      const d = parts?.length === 3                                 
+        ? new Date(`${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`)
+        : new Date(t.date);                                        
       if (isNaN(d)) return;
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       if (!monthMap[key]) monthMap[key] = { month: key, income: 0, expense: 0 };
@@ -207,7 +210,15 @@ function Analytics({ transactions }) {
                 </Pie>
                 <Tooltip
                   formatter={(v) => fmt(v)}
-                  contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", borderRadius: 10, fontSize: 13 }}
+                  contentStyle={{
+                    background: "var(--bg-elevated)",
+                    border: "1px solid var(--border-strong)",
+                    borderRadius: 10,
+                    fontSize: 13,
+                    color: "var(--text-primary)",
+                  }}
+                  labelStyle={{ color: "var(--text-primary)" }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
               </PieChart>

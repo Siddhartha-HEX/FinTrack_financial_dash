@@ -2744,3 +2744,64 @@ tbody tr:hover{
   overflow: visible !important;
   white-space: nowrap !important;
 }
+/* ── Goal Cards ── */
+.goal-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(124, 156, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s var(--ease);
+  box-shadow: 0 0 14px rgba(124, 156, 255, 0.07);
+}
+
+.goal-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Blue — 0 to 33% */
+.goal-card.progress-low {
+  border-color: rgba(124, 156, 255, 0.25);
+  box-shadow: 0 0 16px rgba(124, 156, 255, 0.1);
+}
+.goal-card.progress-low:hover {
+  border-color: rgba(124, 156, 255, 0.55);
+  box-shadow: 0 0 28px rgba(124, 156, 255, 0.22), 0 0 60px rgba(124, 156, 255, 0.07);
+}
+
+/* Yellow — 34 to 66% */
+.goal-card.progress-mid {
+  border-color: rgba(245, 166, 35, 0.25);
+  box-shadow: 0 0 16px rgba(245, 166, 35, 0.1);
+}
+.goal-card.progress-mid:hover {
+  border-color: rgba(245, 166, 35, 0.55);
+  box-shadow: 0 0 28px rgba(245, 166, 35, 0.22), 0 0 60px rgba(245, 166, 35, 0.07);
+}
+
+/* Green — 67 to 99% */
+.goal-card.progress-high {
+  border-color: rgba(0, 229, 195, 0.25);
+  box-shadow: 0 0 16px rgba(0, 229, 195, 0.1);
+}
+.goal-card.progress-high:hover {
+  border-color: rgba(0, 229, 195, 0.55);
+  box-shadow: 0 0 28px rgba(0, 229, 195, 0.22), 0 0 60px rgba(0, 229, 195, 0.07);
+}
+
+/* Teal glow — 100% completed */
+.goal-card.completed {
+  border-color: rgba(0, 229, 195, 0.5);
+  box-shadow:
+    0 0 24px rgba(0, 229, 195, 0.22),
+    0 0 60px rgba(0, 229, 195, 0.08),
+    inset 0 0 24px rgba(0, 229, 195, 0.03);
+}
+.goal-card.completed:hover {
+  border-color: rgba(0, 229, 195, 0.7);
+  box-shadow:
+    0 0 36px rgba(0, 229, 195, 0.3),
+    0 0 80px rgba(0, 229, 195, 0.1),
+    inset 0 0 24px rgba(0, 229, 195, 0.05);
+}

@@ -13,6 +13,8 @@ import FinanceProgress  from "../components/FinanceProgress";
 import TransactionsPage from "./TransactionsPage";
 import Analytics from "./Analytics";
 import BudgetPage from "./BudgetPage";
+import GoalsPage from "./GoalsPage";
+import SettingsPage from "./SettingsPage";
 
 const pageVariants = {
   hidden: { opacity: 0, y: 14 },
@@ -26,7 +28,7 @@ const card = (i) => ({
 });
 
 function MainContent() {
-  const [activePage, setActivePage]         = useState("Dashboard");
+  const [activePage, setActivePage] = useState(() => localStorage.getItem("defaultPage") || "Dashboard");
   const [transactions, setTransactions]     = useState([]);
   const [editData, setEditData]             = useState(null);
   const [searchTerm, setSearchTerm]         = useState("");
@@ -179,6 +181,33 @@ function MainContent() {
                 exit="exit"
               >
                 <Analytics transactions={transactions} />
+              </motion.div>
+            )}
+
+
+            {/* ── GOALS PAGE ── */}
+            {activePage === "Goals" && (
+              <motion.div
+                key="goals"
+                variants={pageVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+              >
+                <GoalsPage />
+              </motion.div>
+            )}
+
+            {/* ── SETTINGS PAGE ── */}
+            {activePage === "Settings" && (
+              <motion.div
+                key="settings"
+                variants={pageVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+              >
+                <SettingsPage darkMode={darkMode} setDarkMode={setDarkMode} />
               </motion.div>
             )}
 
